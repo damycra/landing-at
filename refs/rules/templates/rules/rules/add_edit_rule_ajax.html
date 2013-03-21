@@ -1,0 +1,273 @@
+<div class="dialog"> 
+  
+  <div class="dialog-title clearfix"> 
+    <div class="float-right"> 
+      <a href="#" onclick="Dialog.close(); return false;">Close</a> 
+    </div> 
+    <h2>{% if rule.id or copy %}Edit Rule{% else %}Add Rule{% endif %}</h2> 
+  </div> 
+  <div class="dialog-inner"> 
+    
+
+	{% if form.errors %}
+		<div class="required">
+			<p>Please double check the sections indicated.</p>
+			{{ form.non_field_errors }}
+		</div>
+	{% endif %}
+
+
+<form id="rule_form" 
+	action="{% if copy %}{% url copy_rule website.id orig_rule_id 1 %}{% else %}{% if rule.id %}{% url edit_rule website.id rule.id %}{% else %}{% url add_rule website.id %}{% endif %}{% endif %}" 
+	method="post">
+	{% csrf_token %}
+    
+    <div class="dialog-box" id="formDiv"> 
+      <div class="row clearfix"> 
+        <div class="row-left">{{ form.handler_choice.label_tag }}</div> 
+        <div class="row-right{% if form.handler_choice.errors %} error{% endif %}" style="width:175px;"> 
+          {{ form.handler_choice }} 
+        </div>
+      </div> <!-- //row -->
+	  {% if form.handler_choice.errors %}
+	  <div class="clearfix required">
+	  	{{ form.handler_choice.errors }}
+	  </div> 
+	  {% endif %}
+    </div> <!-- //dialog-box --> 
+
+	{% for k, hf in handler_forms.items %}
+		<div id="hfm_{{ k }}" style="display:none">
+			<div class="dialog-header"> 
+	      		Rule Type: <b>{{ hf.handler_type }}</b> 
+	    	</div> <!-- //dialog-header --> 
+	    
+			<div class="dialog-box">
+			
+			{% if k == 10 %} {# referral #}
+		      <div class="row clearfix"> 
+		        <div class="float-left" style="padding: 5px 10px 0 0">{{ hf.url.label_tag }}<a  href="javascript:toggle('help11')"><img src="{{ MEDIA_URL }}images/help.png"></a> </div> 
+		        <div class="textbox float-left{% if hf.url.errors %} error{% endif %}" style="width: 250px;margin-right: 5px;">{{ hf.url }}</div>
+				<div class="float-left desc" style="padding: 5px 0px 0 0">e.g. http://www.example.com</div> 
+				<div class="required">{{ hf.url.errors }} </div>
+			   	 
+		      </div> <!-- //row --> 
+				<div id="help11" style="display: none; background-color:#ffffcc; font-size:90%">
+
+				<b>About Referring Page Rule</b><br/>Build profiles based on visitors arriving at your site 
+				from a specific page or site. Note that you should include http:// or https:// at the beginning of your URL (however if the
+				referring page is HTTPS then your landing page must also be HTTPS). 
+				You can use an asterisk (*) as a wildcard but you don't need to put one at the end of the URL as it is added implicitly for you. Some examples:
+					<ul>
+					<li>- http://www.bbc.co.uk/ would profile referrals from any part of the main BBC website.</li>
+					<li>- http://edition.cnn.com/2010/SPORT/12/06/cricket.ashes.england.win/index.html profiles arrivals from a specific page on CNN.</li>
+					<li>- https://edition.cnn.com/ would include visitors arriving from any page on the secure (HTTPS) main CNN site but only if arriving at a secure page on your site.</li>
+					<li>- http://*.cnn.com would profile referrals from any subdomain of the CNN site.</li>
+					</ul>
+				The rule is case-insensitive.
+
+				</div>
+		
+			{% endif %}
+			{% if k == 20 %} {# query string #}
+		      <div class="row clearfix"> 
+		        <div class="row-left">{{ hf.query_string.label_tag }}&nbsp;<a  href="javascript:toggle('help12')"><img src="{{ MEDIA_URL }}images/help.png"></a> </div> 
+		        <div class="row-right" style="width:235px;"> 
+		          <div class="textbox{% if hf.query_string.errors %} error{% endif %}">{{ hf.query_string }}</div>
+				<div class="required">{{ hf.query_string.errors }} </div> 
+		 
+		        </div>
+			  </div> <!-- //row --> 
+				<div id="help12" style="display: none; background-color:#ffffcc; font-size:90%">
+
+				<b>About Campaign Rule</b><br>The campaign rule will allow you to build profiles targeting visitors 
+				to your site from specific marketing campaigns. This field supports any valid Google Analytics UTM campaign tracking code (see: 
+				<a href="http://www.google.com/support/analytics/bin/answer.py?hl=en&amp;answer=55578" target="_blank">http://www.google.com/support/...answer=55578</a> 
+				for details on how to set up these codes). 
+				Although we have only tested with Google UTM codes this rule should support any other form of tracking that appends a tracking string to a URL.
+
+				</div>
+			
+			{% endif %}
+			{% if k == 30 %} {# search terms #}
+		      <div class="row clearfix"> 
+		        <div class="row-left">{{ hf.search_terms.label_tag }}&nbsp;<a  href="javascript:toggle('help13')"><img src="{{ MEDIA_URL }}images/help.png"></a> </div> 
+		        <div class="row-right" style="width:235px;"> 
+		          <div class="textbox{% if hf.search_terms.errors %} error{% endif %}">{{ hf.search_terms }}</div>
+		<div class="required">{{ hf.search_terms.errors }} </div> 
+		        </div>
+				
+		      </div> <!-- //row --> 
+				<div id="help13" style="display: none; background-color:#ffffcc; font-size:90%">
+
+				<b>About Search Terms Rule</b><br>The search terms rule allows you to create profiles 
+				based on the search terms visitors type into sites. 
+				This rule works for more than 20 search engines, including Google, Bing and Yahoo. 
+				Use quotation marks (" ") to search for exact phrases. 
+				For example putting <em>"landing page" optimization </em>in the search terms box would build a 
+				profile for searches include the term <em>landing page</em> and/or the word <em>optimization</em> 
+				(but not the words <em>landing</em> or <em>page</em> on their own). If your profile needs 
+				<em>landing page</em> and <em>optimization</em> you can have one search terms rule with
+				<em>"landing page"</em> and a second search terms rule with <em>optimization</em>. 
+
+				</div>
+		
+			{% endif %}
+		    {% if k == 50 %} {# time #}
+		      <div class="three-columns clearfix"> 
+			  	{% if hf.non_field_errors %}
+				<div>
+					{{ hf.non_field_errors }}
+			  	</div>
+				{% endif %}
+		        <div class="col-1"> 
+		          {{ hf.time_from.label_tag }}
+		          <div class="textbox{% if hf.time_from.errors %} error{% endif %}">{{ hf.time_from }}</div> 
+		         <div class="required"> {{ hf.time_from.errors }}</div>
+		        </div> <!-- //col-1 --> 
+		        <div class="col-2"> 
+		          {{ hf.time_to.label_tag }}
+		          <div class="textbox{% if hf.time_to.errors %} error{% endif %}">{{ hf.time_to }}</div> 
+		          <div class="required">{{ hf.time_to.errors }} </div>
+		        </div> <!-- //col-2 --> 
+		        <div class="col-3"> 
+		          {{ hf.timezone.label_tag }}
+		          <div {% if hf.timezone.errors %}class="error"{% endif %}> 
+		            {{ hf.timezone }} 
+		          </div> 
+				  <div class="required">{{ hf.timezone.errors }}</div>
+		        </div> <!-- //col-3 --> 
+		      </div> <!-- //three-columns --> 
+		      <div class="pad-10-0"> 
+		        <div class="day-select clearfix"> 
+		          <label>{{ hf.monday }}<br />Mon</label> 
+		          <label>{{ hf.tuesday }}<br />Tue</label> 
+		          <label>{{ hf.wednesday }}<br />Wed</label> 
+		          <label>{{ hf.thursday }}<br />Thu</label> 
+		          <label>{{ hf.friday }}<br />Fri</label> 
+		          <label>{{ hf.saturday }}<br />Sat</label> 
+		          <label class="last">{{ hf.sunday }}<br />Sun</label> 
+		        </div> <!-- //day-select --> 
+		      </div> 
+		      <div class="three-columns clearfix calendars"> 
+		        <div class="col-1"> 
+		          {{ hf.date_from.label_tag }}
+		          <div class="textbox{% if hf.date_from.errors %} error{% endif %}">{{ hf.date_from }}</div> 
+		          <div class="required">{{ hf.date_from.errors }}</div> 
+		        </div> <!-- //col-1 --> 
+		        <div class="col-2"> 
+		          {{ hf.date_to.label_tag }}
+		          <div class="textbox{% if hf.date_to.errors %} error{% endif %}">{{ hf.date_to }}</div> 
+		          <div class="required">{{ hf.date_to.errors }} </div>
+		        </div> <!-- //col-2 --> 
+		      </div> <!-- //three-columns --> 
+			{% endif %}
+			{% if k == 60 %}
+				<div class="clearfix"> 
+					<div style="display:none">
+						{{ hf.locations }}
+					</div>
+			        <div class="float-left" style="padding: 4px 10px 0 0"> 
+			          <a  href="javascript:toggle('help14')"><img src="{{ MEDIA_URL }}images/help.png"></a> 
+			        </div> <!-- //float-left --> 
+			        <div class="float-left" style="padding: 0px 10px 0 0; width: 200px;"> 
+			          {{ hf.country }} 
+			        </div> <!-- //float-left --> 
+			        <div class="float-left" style="padding: 0px 10px 0 0; width: 90px;" id="state-select"> 
+			          {{ hf.state }} 
+			        </div> <!-- //float-left --> 
+			        <div class="float-left" style="padding: 2px 0 0"> 
+			          <button id="add_location" type="button" class="btn"><span></span>Add location</button> 
+			        </div> <!-- //float-left --> 
+			      </div> <!-- //clearfix --> 
+			      <div class="listing" style="margin-top: 15px"> 
+			        <table> 
+			          <thead> 
+			            <tr> 
+			              <th colspan="2">Active</th> 
+			            </tr> 
+			          </thead> 
+			          <tbody id="location_list"> 
+			          </tbody> 
+			        </table> 
+			      </div> <!-- //listing -->
+					<div id="help14" style="display: none; background-color:#ffffcc; font-size:90%">
+
+					<b>About Location Rule</b><br>	The location rule allows you to identify visitors from a certain country 
+					or group of countries. For visitors from the US you can also target location down to state level. 
+					You can add multiple countries within a single rule.
+					</div>
+			
+				  {% if hf.locations.errors %}
+					<div class="clearfix required">
+						{{ hf.locations.errors }}
+					</div>
+					
+				  {% endif %}
+				  
+			{% endif %}
+			{% if k == 70 %}
+			     Visit count&nbsp;<a  href="javascript:toggle('help15')"><img src="{{ MEDIA_URL }}images/help.png"></a> 
+		      <div class="desc pad-5-0"> 
+		        A new visit is when a visitor arrives for the first time or returns after closing their browser or after a break of 30 minutes or more.  
+		      </div> 
+		      <div class="clearfix"> 
+		        <div class="float-left" style="width: 150px; padding: 0 10px 0 0">{{ hf.more_or_less }}</div> 
+		        <div class="textbox float-left{% if hf.visit_count.errors %} error{% endif %}" style="width: 48px; margin-right: 10px;">{{ hf.visit_count }}</div> 
+		        <div class="float-left" style="padding: 5px 10px 0 0">times in the last</div> 
+		        <div class="textbox float-left{% if hf.time_frame.errors %} error{% endif %}" style="width: 48px; margin-right: 5px;">{{ hf.time_frame }}</div> 
+		        <div class="float-left" style="padding: 5px 0 0;">days.</div>
+				{% if hf.errors %} 
+				</div>
+				<div class="clearfix">
+					<div class="required">
+						{{ hf.more_or_less.errors }}
+						{{ hf.visit_count.errors }}
+						{{ hf.time_frame.errors }}
+					</div>
+				{% endif %}
+		      </div> <!-- //clearfix --> 
+ 				<div id="help15" style="display: none; background-color:#ffffcc; font-size:90%">
+
+				<b>About Frequent Visitor Rule</b><br>	The frequent visitor rule allows you to build profiles that 
+				differentiate between new visitors to your site and returning visitors.  
+				You must specify the number of times that someone needs to have visited your site and you can optionally specify the time 
+				frame over which those visits occurred. Note that visits are only tracked (via cookies) on pages containing the
+				landing.at code snippet; i.e. the time frame can only meaningfully go back to the date the snippet was installed
+				and if the snippet is not on all of your pages the visit count may be inaccurate (too low).  				
+				</div>
+
+			
+			{% endif %}
+			</div> <!-- //dialog-box -->
+		</div>
+	{% endfor %}
+   
+ 
+ 	{% if user_perms.edit %}
+    <div class="dialog-box dialog-box-last"> 
+      <button id="rule_submit" type="submit" class="btn btn-big"><span></span>Save Rule</button> or <a id="cancel_rule_edit" href="#" class="cancel">cancel</a> 
+    </div> <!-- //dialog-box-last -->
+	{% endif %} 
+</form>    
+  </div> 
+</div>
+
+<script id="location_row_template" type="text/x-jquery-tmpl">
+	<tr>
+		<td>${ locationName }</td>
+		<td class="last"><a href="#${ locationCode }" class="remove remove-location">Remove</a></td>
+	</tr>
+</script>
+
+<script type="text/javascript">
+	var currentSelection = 0;
+	var currentRuleId = {% if orig_rule_id %}{{ orig_rule_id }}{% else %}0{% endif %};
+	var initSelection = true;
+	jQuery(document).ready(function($) {
+		addEditRuleSetup();
+		
+		$("#id_search_terms").attr("placeholder", "any word and/or \"exact phrase\"").placeholder();
+	});
+	
+</script>

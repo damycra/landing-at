@@ -1,0 +1,12 @@
+<script type="text/javascript">
+	var _landingAt = _landingAt || new Object();
+	try {
+		_landingAt.token = '{{ website.token }}';
+		_landingAt.website = '{{ website.name }}';
+		(function() {
+		    var lat = document.createElement('script'); lat.type = 'text/javascript'; lat.async = true;
+		    lat.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://cdn') + '.landing.at/lat.js';
+		    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(lat, s);
+		})();	
+	} catch(err) {}
+</script>

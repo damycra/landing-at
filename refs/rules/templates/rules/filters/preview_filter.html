@@ -1,0 +1,90 @@
+<head> 
+	<title>landing.at: {% block title %}Welcome{% endblock %}</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="{{ MEDIA_URL }}css/style.css" type="text/css" media="all" />
+	  
+  	<meta name="keywords" content="" /> 
+  	<meta name="description" content="" />  
+	
+	<!--[if IE]><script language="javascript" type="text/javascript" src="javascripts/excanvas.min.js"></script><![endif]-->
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js" type="text/javascript"></script>
+	<script src="http://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" type="text/javascript"></script>
+	
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/scripts.js"></script>	 
+	{% block custom_js %}
+	
+	{% endblock %}
+
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18960747-1']);
+  _gaq.push(['_setDomainName', '.landing.at']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</head> 
+<body>
+
+{% block content %}
+
+<p>Test for profile: <strong>{{ filter.name }}</strong>. 
+
+{% if errors %}
+	<h1>Error</h1>
+	<ul>
+	{% for err in errors %}
+		<li>{{ err }}</li>
+	{% endfor %}
+	</ul>
+	
+{% else %}
+
+	Profile uses group id {{ filter.container_element_id }}. <a id="highlight_content" href="#">(Highlight on page).</a></p>
+	
+	{% if warnings.0 %}
+		<div>
+		<ul class='error-message' >
+		{% for wrn in warnings %}
+			<li>Warning: {{ wrn }}</li>
+		{% endfor %}
+		</ul>
+	{% endif %}
+
+	<iframe id="preview" style="width:99%; height:100%; z-index:999; background-color:white; border:double"></iframe>
+	
+	<script type="text/javascript">
+		var d;
+		var container_selector = "#" + "{{ filter.container_element_id }}";
+		jQuery(document).ready(function($){
+			if (d)
+				return; //else we double up the content...
+			d = jQuery("#preview")[0].contentWindow.document;
+		    d.open();d.close();
+		    d.write("{{ page|escapejs }}");
+			jQuery("body", jQuery(d)).append(unescape("%3Cscript type='text/javascript'%3Evar _landingAt=function(){ return {" + 
+								"show : function(msg, elemId) {d.getElementById(elemId).innerHTML=msg;}," + 
+								" gaTrack : function() {return true;} } }();" +
+								"\n {{ msg_script|escapejs }}\n %3C/script%3E"));
+			
+			$("#highlight_content").click(function() {
+				$(container_selector, d).hide().show(2000); //do something better!
+				return false;
+			});
+		});	
+	</script>
+
+{% endif %} {# end of if errors #}
+
+{% endblock %}
+</body> 
+</html>
+

@@ -1,0 +1,478 @@
+{% extends 'rules/filters/filter_base.html' %}
+{% load rule_tags %}
+
+{% block title %}{% if filter.id %}Edit Profile:{{ filter.name }}{% else %}Add Profile{% endif %}{% endblock %} 
+
+{% block custom_js %}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.date_input.js"></script>  
+{% endblock %}
+
+
+{% block content_div_attributes %}class="content-narrow"{% endblock %}
+
+{% block content %}
+
+	<form id="mainForm" method="post" >{% csrf_token %}
+			{% if sandbox %}
+			<div style="background-color:#ffffcc;">
+			
+		<p>In the sandbox you can create and edit profiles and test them on our 'example' site. But remember that any changes you make won't be saved and if you want to see what changes would look like on your own site you will need to setup an account at <a href="https://www.landing.at">www.landing.at</a>.<p></div>
+			{% else %}
+			 {% endif %} 
+		
+        <div id="filter-add"> 
+          <div class="float-right pad-15-0" style="font-size: 16px;"><a href="{% url filters website.id %}"><b>&larr; Go back</b></a></div> 
+          <h2>{% if filter.id %}Edit Profile{% else %}Create New Profile{% endif %}</h2>
+          <div class="border-box"> 
+            <div class="border-box-inner border-box-first"> 
+              {% if form.errors %}
+			  <div class="error-message"> 
+                Please check the errors detailed below
+              </div> <!-- //error-message -->
+			  {{ form.non_field_errors }}
+			  {% endif %} 
+              
+              <div> 
+	              <div class="clearfix row"> 
+		             
+		
+	                <div class="row-left">{{ form.name.label_tag }}<span class="required">*</span>&nbsp;<a  href="javascript:toggle('help1')"><img src="{{ MEDIA_URL }}images/help.png"></a>
+					        
+                    </div> 
+	                <div class="row-right"><div class="textbox{% if form.name.errors %} error{% endif %}" style="width: 395px;">{{ form.name }}</div>
+					
+					</div>
+					<div class="required">{{ form.name.errors }}</div>
+	              </div> <!-- //row --> 
+
+				<div id="help1" style="display: none; background-color:#ffffcc; font-size:90%">
+					<b>About Profile Name</b><br />Helps you identify your profile. If you have Google Analytics tracking switched on the profile name 
+					is used to identify results from each profile, so use something that is sufficiently descriptive.
+				</div>
+              </div> 
+            </div> <!-- //border-box-inner --> 
+			
+			 
+            <div class="border-box-inner"> 			  
+			<div style="display:none"> 
+				{{ form.rules.label_tag }} 
+				{{ form.rules }}
+				{{ form.rules.errors }} 
+			</div>
+			  <div class="row-right"></div>
+              <div class="listing"> 
+                <table> 
+                  <tbody id="rule_list">
+                  	{% if filter.id %}
+						{% for rule in filter.rules.all %}
+							{% rule_summary %}
+						{% endfor %} 
+					{% endif %}
+                  </tbody> 
+
+                </table> 
+
+              </div> <!-- //listing --> 
+				<p><a href="{% url add_rule website.id %}" class="btn" id="add-new-rule"><span></span>Add new rule</a></p>
+
+			   <div class="required">{{ form.rules.errors }}</div>
+
+            </div> <!-- //border-box-inner --> 
+
+            <div class="border-box-inner"> 
+			  
+              <div class="clearfix row"> 
+                <div class="row-left">{{ form.html.label_tag }}<span class="required">*</span>&nbsp;<a  href="javascript:toggle('help2')"><img src="{{ MEDIA_URL }}images/help.png"></a> </div> 
+                <div class="row-right"><div class="textarea{% if form.html.errors %} error{% endif %}">{{ form.html }}</div></div>
+
+				<div class="required">{{ form.html.errors }}</div> 
+			 </div>
+				
+			   	<div id="help2" style="display: none; background-color:#ffffcc; font-size:90%">
+				<b>About Content</b><br/>This is the personalized text you want to be displayed when this profile is triggered. 
+				You can include plain text, HTML or even scripts in this box (so you could show a YouTube video or any other sort of embeddable online content).
+				</div>
+			
+				{% if not sandbox %}
+			
+			  <div id="group_id_desc" class="clearfix row" style="{% if form.container_element_id.errors %}display:none{% endif %}"> 
+                <div class="row-left">Tag<span class="required">*</span>&nbsp;<a  href="javascript:toggle('help3')"><img src="{{ MEDIA_URL }}images/help.png"></a></div>
+                <div class="row-right">
+						Paste this tag in each page where you want the above content to appear.
+						<div class="textbox float-left" style="width:395px; margin-right:5px;">
+							<input type="text" name="zzz" id="group_id_snippet" value='<div id="{{ filter.container_element_id }}"></div>' /> 
+						</div>
+				</div>
+			 </div>             
+						<div id="help3" style="display: none; background-color:#ffffcc; font-size:90%">
+						<b>About Tag</b><br/>At its simplest just paste the tag provided on your page(s) at 
+						the point where you want content personalization to occur. You can have as many tags 
+						as you want on each page, but it is important that the same tag doesn't appear more than once. 
+						Tags also have a number of advanced features. landing.at supports any valid format. 
+						For example, &lt;span id="landingat1"&gt;&lt;/span&gt; or  &lt;h1 id="landingat2"&gt;&lt;/h1&gt; could both be used. 
+						More detailed information on tags is available in the <a href="http://support.landing.at/entries/325411-working-with-tags" target="_blank">working with tags</a> section of the user guide.
+						 </div>           
+						
+					 {% endif %} 
+
+            </div> <!-- //border-box-inner -->
+
+ 			{% if not sandbox %}
+
+            <div class="border-box-inner"> 
+              <div class="clearfix row">
+	            <div class="row-left">Test<span class="required">*</span>&nbsp;<a  href="javascript:toggle('help4')"><img src="{{ MEDIA_URL }}images/help.png"></a></div>
+	 
+                <div class="row-right" style="width: 490px; margin-right: 5px"><div class="textbox float-left" style="width: 395px; margin-right: 5px;"><input name="test_url" id="id_test_url" type="text" value="{{ preview_url }}" /></div> <button type="button" id="preview_filter" class="btn" style="width: 70px;">Preview</button> 
+              </div></div>
+			  <div class="loading" style="display:none">&#160;</div><div id="preview_errors" class="clearfix row required" style="display:none"></div> 
+				<div id="help4" style="display: none; background-color:#ffffcc; font-size:90%">
+
+				<b>About Profile Test</b><br/>We recommend you test the profile before setting it live by entering the URL of a page where you are 
+				planning to use this profile, after inserting the tag in the page. The test will show you the impact of the personalization 
+				(without making any changes to your site) and also warn you of any errors. 
+
+				</div>            
+</div> <!-- //border-box-inner -->
+			{% endif %}
+			
+			{% if filter.code or filter.all_pages == 0 %}
+				<div class="border-box-inner" id="advanced_options">
+					{% if not user.get_profile.show_advanced_options %}
+					<div class="clearfix row"> 
+            			To edit these items you must enable advanced options in <a href="{% url edit_user_profile %}" target="_blank">your settings</a>.
+					</div>
+					{% endif %}
+					{% if filter.all_pages == 0 %}
+					<div class="clearfix row"> 
+            			<div class="row-left">Apply To</div>
+						<div class="row-right">
+							<ul>
+								{% for p in filter.page_group.pages.all %}
+									<li>{{ p }}</li>
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
+					{% endif %}
+					{% if filter.code %}
+					<div class="clearfix row"> 
+            			<div class="row-left">Custom Code</div><div class="row-right"><pre style="width:495px; overflow:scroll;">{{ filter.code }}</pre></div>
+					</div>
+					{% endif %}
+					{% if user.get_profile.show_advanced_options %}
+					<div class="clearfix row">
+						<a href="#" id="show_hide_advanced" class="one-time">Edit Advanced Options</a>
+					</div>
+					{% endif %}
+				</div>
+					
+			{% else %}
+				{% if user.get_profile.show_advanced_options %}
+				<div class="border-box-inner">
+					<a href="#" id="show_hide_advanced">Show Advanced Options</a>
+				</div>
+				{% endif %}
+			{% endif %}
+			
+			
+			<div id="advanced_options_edit" class="border-box-inner" style="display:none">
+			              <div class="clearfix row"> 
+
+			                <div class="row-left">Apply To:<span class="required">*</span></div> 
+			                <div class="row-right"> {{ form.all_pages }}</div>
+							<div class="required">{{ form.all_pages.errors }}</div> 
+				          </div> <!-- //row --> 
+
+						 		<div id="pageForms" style="display:none;">
+									{{ page_formset.management_form }}
+									{% for pform in page_formset.forms %}
+										<div class="pageForm">
+											{{ pform.as_p }} 
+										</div>
+									{% endfor %} 
+								</div>
+
+					              <div id="pageListing" class="listing"> 
+					                <table> 
+					                  <tfoot>
+					                  	<tr id="pageListHelpRow"> 
+					                      <td>You may use an asterisk (*) as a wildcard in the URL.</td> 
+					                      <td class="last">&nbsp;</td> 
+					                    </tr> 
+					                    <tr> 
+					                      <td colspan="2">  
+											<div class="float-right"> 
+					                          <div class="textbox float-left" style="width: 305px; margin-right: 5px"><input id="addPage" type="text" value="/" /></div> 
+											  <a id="addPageBtn" href="#" class="btn" style="width: 75px;"><span></span>Add page</a> 
+					                        </div> 
+											<div class="float-left pad-5-0">http://{{ website.name }}</div>
+					                      </td> 
+					                    </tr> 
+					                  </tfoot> 
+					                  <tbody id="pageList">  
+					                  </tbody> 
+					                </table> 
+					              </div> <!-- //listing --> 
+			
+				<div id="group_id_edit" class="clearfix row"> 
+	                <div class="row-left"><label for="id_container_element_id">Tag<span class="required">*</span></label></div> 
+	                <div class="row-right">
+	                	<div class="textbox float-left{% if form.container_element_id.errors %} error{% endif %}" style="width: 175px; margin-right:5px;">{{ form.container_element_id }}</div>
+					</div>
+					{% if form.container_element_id.errors %}<div class="required">{{ form.container_element_id.errors }}</div>{% endif %} 
+	              </div> <!-- //row -->
+						 
+              <div class="clearfix row"> 
+                <div class="row-left">{{ form.code.label_tag }}</div> 
+                <div class="row-right"><div class="textarea{% if form.code.errors %} error{% endif %}">{{ form.code }}</div></div>
+				{{ form.code.errors }} 
+              </div> <!-- //row -->			  
+			</div>
+						 {% if sandbox %}
+						
+								{% if user_perms.edit %} 
+					            <div class="border-box-inner border-box-last"> 
+					              <button type="button" id="preview_filter" class="btn btn-big" >Test Profile</button> &nbsp; <button type="submit" class="btn btn-big">{% if filter.id %}Save Profile{% else %}<span></span>Add Profile{% endif %}</button> or <a href="{% url filters website.id %}">Cancel</a> 
+					            </div> <!-- //border-box-inner -->
+								{% endif %} 
+					          </div> <!-- //border-box --> 
+					        </div> <!-- //add-filter --> 
+						</form>
+					    
+						
+			 			 {% else %}
+						
+            <div id="activeSlider" class="border-box-inner">
+	          <div class="clearfix row"> 
+                <div class="row-left">	{{ form.active.label_tag }}</div> 
+                <div class="row-right">	{{ form.active }}</div>
+				{{ form.active.errors }} 
+              </div> <!-- //row -->			  
+    
+			
+            </div> <!-- //border-box-inner -->
+			{% if user_perms.edit %} 
+            <div class="border-box-inner border-box-last"> 
+              <button type="submit" class="btn btn-big">{% if filter.id %}Save Profile{% else %}<span></span>Add Profile{% endif %}</button> or <a href="{% url filters website.id %}">Cancel</a> 
+            </div> <!-- //border-box-inner -->
+			{% endif %} 
+          </div> <!-- //border-box --> 
+        </div> <!-- //add-filter --> 
+	</form>
+	 {% endif %}
+	
+{% endblock %}
+
+{% block bottom_script %}
+{{ block.super }}
+<script type="text/javascript">
+	
+	var checkFilterUrl = "{% url check_filter website.id %}";
+	jQuery(document).ready(function($) {
+		
+		$("#id_html").attr("placeholder", "e.g. <h1>Welcome!</h1>").placeholder();
+		$("#id_test_url").attr("placeholder", "e.g. http://{{ website.name }}/products/index.html").placeholder();
+		
+		$("#activeSlider input[type=checkbox]").jbCheck();
+		//$(".tooltip-trigger").tooltip({ position: "bottom left", opacity: 1.0, offset: [40, 0], delay: 200, effect: "fade"} );
+		
+		$("#rule_list").children().each(function(idx, elem){
+			var rid = this.id.substring(8);
+			if($("#id_rules option[value=" + rid + "]:selected").length == 0)
+				$(this).remove();		
+		});
+		
+		$("#id_container_element_id").keyup(function(event) {
+			$("#group_id_snippet").val("<div id=\"" + $("#id_container_element_id").val() + "\"></div>");
+		});
+		
+		$("#group_id_snippet").keydown(function(event){
+			if ((event.ctrlKey || event.metaKey) && event.keyCode == 67) {
+				return true;
+			}
+			else {
+				event.preventDefault();
+				return false;
+			}
+		});
+		
+		$("input:radio[name=all_pages]").change(function() {
+			if (this.value==0) {
+				$("#pageListing").show(300);
+			}				
+			else {
+				$("#pageListing").hide(300);
+			}
+		});
+		
+		if ($("input:radio[name=all_pages]:checked").val() == 0) {
+			$("[name^=pages-][name$=-id]").each(function() {
+				var re = /pages-(\d+)-id/;
+				var pid = re.exec(this.name)[1];
+				var purl = "#id_pages-" + pid  + "-url";
+				if($(purl).val())
+					addPageRow(pid, $(purl).val());
+			});
+			$("#pageListHelpRow").remove();
+		}
+		else {
+			$("#pageListing").hide();
+		}
+		
+		
+		$("#addPage").keypress(function(event) {
+			if (event.keyCode == 13) {	
+				addUrl();
+				event.preventDefault();
+				return false;
+				}
+		});
+		
+		$("#addPageBtn").click(function(){
+			addUrl();
+			return false;
+		});
+		
+		$(".deleteRule").live('click', function(){
+			var hashTag = this.href.substring(this.href.indexOf("#") + 1);
+			var ruleId = hashTag.substring(hashTag.indexOf("_") + 1);
+			var deleting = hashTag.substring(0, 3) == "del";
+			if (deleting) {
+				this.href= "#undelete_" + ruleId;
+				$(this).html("Undelete");
+				
+				var val = $("#id_rules").val();
+				var newVal = [];
+				for (i=0;i< val.length; i++) {
+					if (val[i] != ruleId)
+						newVal.push(val[i]);
+				}
+				$("#id_rules").val(newVal);
+				$("#rule-tr-" + ruleId).remove();
+				
+			}
+			//else {
+			//	this.href= "#delete_" + ruleId;
+			//	$(this).html("Delete");
+			//	$("#id_rules option[value=" + ruleId + "]").attr("selected", "selected");
+			//}
+			
+			return false;
+		});
+		
+		$("#show_hide_advanced").toggle(function() {
+				if ($(this).hasClass("one-time"))
+					$(this).parent().remove();
+				else
+					$(this).html("Hide Advanced Options");
+				$("#advanced_options").hide(200);
+				$("#advanced_options_edit").show(400);
+			},function(){
+				$(this).html("Show Advanced Options");
+				$("#advanced_options_edit").hide(200);
+		});
+		
+		$("#preview_filter").click(function(event) {
+			$(".loading").show();
+			$("#preview_errors").hide().html("");
+			var formForPost = $("#mainForm").serialize();
+			$.post(checkFilterUrl, formForPost, function(response, status, xhr){
+				if(xhr.getResponseHeader('Content-Type').indexOf('json') > -1) {
+					data = $.parseJSON( response );
+					if(data == null)
+						data = response;
+					if(data.status == "OK") {
+						$("#mainForm").attr("target", "_blank").attr("action", data.preview_url).submit();
+						$("#mainForm").attr("target", "").attr("action", "");
+					}
+					else {
+						$("#preview_errors").append("<ul class='errorlist' />");
+						for (err in data.errors) {
+							$("#preview_errors ul").append("<li>" + data.errors[err] + "</li>");
+						}
+					}
+				}
+				else {
+					$("#preview_errors").html("An unexpected error occurred, please try again in a few moments");
+				}
+				
+				$("#preview_filter").attr("disabled", "").removeClass('btn-disabled');
+				setTimeout('$(".loading").hide();', 1000);
+				setTimeout('$("#preview_errors").show(500);', 1000);
+			});
+			$("#preview_filter").attr("disabled", "disabled").addClass('btn-disabled');
+			setTimeout('$("#preview_filter").attr("disabled", "").removeClass("btn-disabled");', 5000);
+			event.preventDefault();
+			return false;
+		});
+		
+		$("#id_test_url").keypress(function(event) {
+			if (event.keyCode == 13) {	
+				$("#preview_filter").click();
+				event.preventDefault();
+				return false;
+			}
+		});
+		 
+	});
+	
+	function addPageRow(newId, newUrl) {
+		$("#pageListHelpRow").remove();
+		$("#pageList").append("<tr id='url-tr-" 
+					+ newId + "'><td>" 
+					+ newUrl + "</td><td class='last'><a href='#' onclick='deleteUrl(" 
+					+ newId + "); return false;' class='remove'>Remove</a></td></tr>");
+	}
+	
+	function deleteUrl(id) {
+		$("#id_pages-" + id + "-DELETE").attr("checked", "checked");
+		$("#url-tr-" + id).hide(300).remove();
+	}
+	
+	function addUrl() {
+		var newId = parseInt($("#id_pages-TOTAL_FORMS").val()); 
+		var newUrl = $("#addPage").val();
+		var clone = $(".pageForm").first().clone();
+		clone.find("[id^=id_pages-][id$=-id]").remove();
+		clone.find("[name^=pages-],[id^=id_pages-]").each(function() {
+			var thiz = $(this);
+			if (thiz.attr("name"))
+				thiz.attr("name", thiz.attr("name").replace("0", newId));
+			if (thiz.attr("for"))
+				thiz.attr("for", thiz.attr("for").replace("0", newId));	
+			if (thiz.attr("id")) {
+				thiz.attr("id", thiz.attr("id").replace("0", newId));
+				if (thiz.attr("id") == "id_pages-" + newId + "-url")
+					thiz.val(newUrl);
+			}
+		});
+		clone.appendTo("#pageForms");
+		$("#id_pages-TOTAL_FORMS").val(newId+1);
+		addPageRow(newId, newUrl);
+		$("#addPage").val("/");
+	}
+	
+	function ruleSaved(data, oldRuleId) {
+		var ruleId = data["id"]; 
+		if (oldRuleId > 0) {
+			$("#rule-tr-" + oldRuleId).after(data["summary"]).remove();	
+		}
+		else
+			$("#rule_list").append(data["summary"]);
+						
+		if($("#id_rules option[value=" + ruleId + "]").length == 0) {
+			$("#id_rules").append("<option value=\"" + ruleId + "\">new rule</option>");
+		}
+		
+		var val = $("#id_rules").val() || [];
+		var newVal = [ruleId];
+		for (i=0; i < val.length; i++) {
+			if (val[i] != oldRuleId)
+				newVal.push(val[i]);
+		}
+		$("#id_rules").val(newVal);
+	}
+		
+</script>
+{% endblock %}

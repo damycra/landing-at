@@ -1,0 +1,14 @@
+Dear {{ user.first_name }},
+
+Thank you for signing-up for LandingAt. 
+
+For some personalization ideas there are 17 easy-to-implement ideas on our blog: 
+http://www.landingat.com/blog/17-tips-improve-conversions-personal-touch 
+
+As a startup, we rely on your feedback to improve our service. Please take a moment and let us know what we're doing well and where we can improve by replying directly to this e-mail. In return for your feedback you will receive you a complimentary 12 months paid account. 
+
+Best wishes,  
+
+Michael
+www.landingat.com 
+support@landing.at 

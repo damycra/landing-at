@@ -1,0 +1,10 @@
+
+Thank you for registering for a landing.at customer account.
+
+Please activate your account at:
+http://manage.landing.at{% url registration_activate activation_key %}
+
+Many thanks, 
+
+The landing.at team
+support@landing.at

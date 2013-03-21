@@ -1,0 +1,47 @@
+{% extends 'rules/rules/rule_base.html' %}
+
+{% load rule_tags %}
+
+{% block title %}Rules for {{ website.name }}{% endblock %}
+{% block body %}
+<!-- 
+<div class="gt-form gt-content-box">
+					
+	<h3 class="gt-form-head">Rules</h3>
+
+	{% if messages %}
+	<ul class="messages">
+	    {% for message in messages %}
+	    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+	    {% endfor %}
+	</ul>
+	{% endif %}
+
+	{% if form.errors %}
+	<p>Please double check the sections indicated.</p>
+		{{ form.non_field_errors }}
+	{% endif %}
+		
+	<div class="clearfix">
+		<div class="gt-content-box"> 
+						<table border="0" class="gt-table"> 
+							<thead> 
+								<tr> 
+									<th></th><th>Name</th><th>Category</th><th>Currently Active</th> 
+								</tr> 
+							</thead> 
+							<tbody>
+								{% for rule in rules %}
+									{% rule_summary %}
+								{% endfor %}  
+							</tbody> 
+						</table> 
+					</div> 
+					<div class="gt-table-buttons"> 
+						<a href="{% url add_rule website.id %}" class="gt-btn-blue-large gt-btn-left">Add New Rule</a> 
+					</div> 
+		</div>
+	</div>
+-->
+
+{% endblock %}

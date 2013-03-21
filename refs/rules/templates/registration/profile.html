@@ -1,0 +1,59 @@
+{% extends 'registration/registration_base.html' %}
+
+{% block content %}
+<div class="gt-form gt-content-box">
+					
+	<h3 class="gt-form-head">Your settings</h3>
+	 
+	{% if messages %}
+	<ul class="messages">
+	    {% for message in messages %}
+	    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+	    {% endfor %}
+	</ul>
+	{% endif %}
+	
+	<table class="form" cellspacing="10px">	
+		<tr>
+			<th>Name:</th>
+			<td>{{ user.first_name }} {{ user.last_name }}</td>
+		</tr>
+		<tr>
+			<th>Email:</th>
+			<td> {{ user.email }}</td>
+		</tr>
+		<tr>
+			<th>Location:</th>
+			<td>{% if profile.state %} {{ profile.state }}, {% endif %} {{ profile.country }}</td>
+		</tr>
+	</table>
+	
+	<p><a href="{% url edit_user_profile %}">Edit your profile</a> | <a href="{% url change_password %}">Change your password</a></p>
+	<hr />
+	<div class="BodyLeftContent">
+	{% if subscription %}
+	{% for sub in subscription %}
+	<p style="float:none;">
+		Subscriber to {{ sub.code.subscription.name }}. 
+		<a href="{% url activate_subscription_no_token %}">New subscription code?</a><br />
+		Delivery address:</p>
+	<pre>{{ sub.shipping_address.full_address }}</pre>
+	<p> 
+		<a href="{% url change_subscription_address sub.code.token %}">Change Address</a> | 
+		<a href="{% url unsubscribe_view sub.code.token %}">Unsubscribe</a>
+	</p>
+	{% endfor %}
+	{% else %}
+	<p>No active subscription: why not subscribe?</p>
+	{% endif %}
+	</div>
+	
+	{% if invoices %}
+	<div class="BodyLeftContent">
+	<p>
+		<a href="{% url invoices_view %}">View your Recurring Payments</a>
+	</p>
+	</div>
+	{% endif %}
+</div>
+{% endblock %}

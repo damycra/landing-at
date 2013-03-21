@@ -1,0 +1,206 @@
+{% extends 'rules/rules/rule_base.html' %}
+{% block title %}{% if rule %}Edit Rule:{{ rule.name }}{% else %}Add Rule{% endif %}{% endblock %}
+
+
+
+{% load rule_tags %}
+
+
+{% block body %}
+<div class="gt-form gt-content-box">
+					
+	<h3 class="gt-form-head">{% if rule %}Edit Rule:{{ rule.name }}{% else %}Add Rule{% endif %}</h3>
+
+	{% if messages %}
+	<ul class="messages">
+	    {% for message in messages %}
+	    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+	    {% endfor %}
+	</ul>
+	{% endif %}
+
+	{% if form.errors %}
+	<p>Please double check the sections indicated.</p>
+		{{ form.non_field_errors }}
+	{% endif %}
+	
+	<form id="rule_form" action="{% if rule.id %}{% url edit_rule website.id rule.id %}{% else %}{% url add_rule website.id %}{% endif %}" method="post">
+	{% csrf_token %}
+	
+	<div class="clearfix" id="formDiv">
+		<div class="gt-form-row gt-width-150"> 
+			{{ form.name.label_tag }} 
+			{{ form.name }}
+			{{ form.name.errors }} 
+		</div>
+		<div class="gt-form-row gt-width-150"> 
+			{{ form.handler_choice.label_tag }} 
+			{{ form.handler_choice }}
+			{{ form.handler_choice.errors }} 
+		</div>
+		<div class="gt-form-row gt-width-150"> 
+			{{ form.not_rule.label_tag }} 
+			{{ form.not_rule }}
+			{{ form.not_rule.errors }} 
+		</div>
+
+
+		<div id="forms_bucket" style="display:none">
+		{% for k, hf in handler_forms.items %}
+			<div id="hfm_{{ k }}" class="handler_form_marker gt-form-row gt-width-150">
+				{{ hf.as_p }}
+			</div>
+		{% endfor %}
+		</div>
+
+
+		
+<!--		<div class="gt-form-row gt-width-150"> 
+			{{ form.all_pages.label_tag }} 
+			{{ form.all_pages }}
+			{{ form.all_pages.errors }} 
+			<span id="addPageSpan" style="display:none"> 
+				Enter url: <input id='addPage' type='text' /><button type='button' onclick='addUrl()'>Add</button>
+				<ul id='specificPages'></ul>
+			</span>
+		</div>
+		<div id="pageForms" style="display:none;">
+			{{ page_formset.management_form }}
+			{% for pform in page_formset.forms %}
+				<div class="pageForm">
+					{{ pform }} 
+				</div>
+			{% endfor %} 
+		</div>
+-->
+
+	</div>
+
+	<div class="gt-form-row"> 
+		<button type="submit" class="gt-btn-blue-small gt-btn-left" >Save</button>  
+		<p class="gt-cancel">or <a href="{% url rules website.id %}">cancel</a> 
+		</p>
+	</div> 	
+	
+	</form>
+</div>
+
+
+
+<style>
+	ul.connected_sortable {list-style-type: none; margin: 0; padding: 0; float: left; margin-right: 10px; background: #eee; padding: 5px; width:95%; height:95%;}
+	ul.connected_sortable li { margin: 0 3px 3px 3px; padding: 0.4em; padding-left: 1.5em; font-size: 1.4em; height: 18px; }
+	ul.connected_sortable li span { position: absolute; margin-left: -1.3em; }
+	ul.connected_sortable li span.e-w-arrows { position:relative; float:right;}
+</style>
+
+<table id="select" style="display:none;">
+	<tr>
+		<tr>
+			<th>Selected:</th>
+			<th>Available:</th>
+		</tr>
+
+		<td>
+			<div style="width:250px; height:300px; overflow-y:scroll; border:1px solid">
+				<ul id="selected" class="connected_sortable">
+					
+				</ul>
+			</div>
+		</td>
+		<td>
+			<div style="width:250px; height:300px; overflow-y:scroll; border:1px solid;">
+				<ul id="available" class="connected_sortable">
+					{% for lg in location_groups %}
+					 {% locationgroup_summary lg %}
+					{% endfor %}					
+				</ul>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2"><a href="{# url add_locationgroup rule.website.id #}" id="add_locationgroup">Add location group</a></td>
+	</tr>
+</table>
+
+<script type="text/javascript">
+	var currentSelection = 0;
+	
+	jQuery(document).ready(function($) {
+		
+		$("span.e-w-arrows").live('click', function() {
+			var li = $(this).parent();
+			var lid = li.attr("id").substring(3);
+			
+			if($(this).parents("#selected").length > 0) {
+				li.detach().appendTo("#available");
+				$("#id_location_groups option[value=" + lid + "]").removeAttr("selected");
+			}
+			else {
+				li.detach().appendTo("#selected");
+				$("#id_location_groups option[value=" + lid + "]").attr("selected", "selected");
+			}
+			li.effect('highlight', 1000);
+		});
+		
+		var td = $("#id_location_groups").parent();
+		var id_lgs = $("#id_location_groups").detach(); //.hide(); 
+		td.empty().append($("#select").show().detach()).append(id_lgs);
+		
+		$("#selected, #available").sortable({
+			connectWith: '.connected_sortable',
+			dropOnEmpty: true,
+			axis: 'x',
+			update: function(event, ui) {
+				ui.item.effect('highlight', 1000);
+				var lid = ui.item.attr("id").substring(3);
+				if ($(ui.item).parent().attr("id") == "selected")
+					$("#id_location_groups option[value=" + lid + "]").attr("selected", "selected");
+				else
+					$("#id_location_groups option[value=" + lid + "]").removeAttr("selected");
+			},
+			handle: '.ui-icon',
+		}).disableSelection();
+		
+		$(".handler_form_marker").each(function() {
+			var hf_class = "handler_form_" + this.id.substring(4);
+			$(this).children().addClass(hf_class); // nextUntil(".handler_form_marker").addClass(hf_class);
+		});
+		
+		$("#id_handler_choice").change(function(){
+			if (currentSelection > 0) {
+				$(".handler_form_" + currentSelection).detach().appendTo("#forms_bucket");
+			}
+			var val = $(this).val();
+			currentSelection = val ? val : 0; 
+			if (currentSelection > 0) {
+				$(".handler_form_" + currentSelection).detach().appendTo("#formDiv");
+			}
+		}).change();
+		
+		
+		$("#edit_rule_cancel").click(function() {
+			setTimeout('$("#popup").empty()', 1000);
+			hidePopup();
+			return false;
+		});
+		
+		var dates = $('#id_date_from, #id_date_to').datepicker({
+			defaultDate: "+1w",
+			changeMonth: true,
+			numberOfMonths: 2,
+			dateFormat: "yy-mm-dd",
+			onSelect: function(selectedDate) {
+				var option = this.id == "id_date_from" ? "minDate" : "maxDate";
+				var instance = $(this).data("datepicker");
+				var date = $.datepicker.parseDate(instance.settings.dateFormat || $.datepicker._defaults.dateFormat, selectedDate, instance.settings);
+				dates.not(this).datepicker("option", option, date);
+			}
+		});
+	});
+	
+</script>
+
+
+
+{% endblock %}

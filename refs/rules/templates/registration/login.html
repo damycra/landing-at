@@ -1,0 +1,60 @@
+{% extends 'registration/registration_base.html' %}
+
+{% block title %}Log In{% endblock %}
+
+
+{% block first_tab_text %}Log In{% endblock %}
+
+{% block content %}
+        <form id="mainForm" method="post" >{% csrf_token %}
+		  
+          <h1>Log In</h1>
+          <div class="border-box">
+          	{% if form.errors %} 
+            <div class="border-box-inner border-box-first small-text"> 
+              {% if form.errors %}
+			  <div class="error-message"> 
+                Please check the errors detailed below
+              </div> <!-- //error-message -->
+			  {{ form.non_field_errors }}
+			  {% endif %}  
+            </div> <!-- //border-box-inner --> 
+		    {% endif %}
+			
+			
+			<div class="border-box-inner{% if not form.errors %} border-box-first{% endif %}"> 
+              <div class="clearfix row"> 
+                <div class="row-left">{{ form.username.label_tag }} <span class="required">*</span></div> 
+                <div class="row-right"><div class="textbox{% if form.username.errors %} error{% endif %}" style="width: 175px;">{{ form.username }}</div></div>
+				{{ form.username.errors }} 
+              </div> <!-- //row --> 
+
+              <div class="clearfix row"> 
+                <div class="row-left">{{ form.password.label_tag }} <span class="required">*</span></div> 
+                <div class="row-right"><div class="textbox{% if form.password.errors %} error{% endif %}" style="width: 175px;">{{ form.password }}</div><a href="{% url django.contrib.auth.views.password_reset %}" class="cancel">forgotten your password?</a>
+				</div>
+				{{ form.password.errors }} 
+              </div> <!-- //row -->
+            </div> <!-- //border-box-inner -->
+
+            <div class="border-box-inner border-box-last"> 
+              <button type="submit" class="btn btn-big">Log In</button> or <a href="{% url registration_register %}" class="cancel">register</a>
+			  
+			            </div> <!-- //border-box-inner --> 
+          </div> <!-- //border-box --> 
+	
+		</form>
+
+{% endblock %}
+
+{% block bottom_script %}
+
+<script type="text/javascript">
+	jQuery(document).ready(function($) {
+		$("#id_username").focus();
+	});
+	
+</script>
+{% endblock %}
+
+

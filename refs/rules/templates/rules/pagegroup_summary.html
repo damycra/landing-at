@@ -1,0 +1,13 @@
+<div id="page_group_{{ page_group.id }}" style="background:{{ colour }}">
+	<p>
+		{% with page_group.filters.count as used_by %}
+		{{ page_group }} (used by {{ used_by }} filter{{ used_by|pluralize }}) | <a class="edit_page_group" href="{% url edit_pagegroup page_group.website.id page_group.id %}">Edit</a> 
+		{% if used_by == 0 %}| <a class="delete_page_group" href="{% url delete_pagegroup page_group.website.id page_group.id %}">Delete</a>{% else %}| (Remove from all filters before deleting){% endif %}
+		{% endwith %} 
+		<ul>
+			{% for page in page_group.pages.all %}
+			<li>{{ page }} {% if page.query_string_parameter %}(Vary by query string: {{ page.query_string_parameter }}){% endif %}</li>
+			{% endfor %}
+		</ul>
+	</p>
+</div>

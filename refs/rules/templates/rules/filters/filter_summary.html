@@ -1,0 +1,7 @@
+<tr id="filter_row_{{ filter.id }}"> 
+    <td class="first"><div {% if user_perms.edit %}class="reorder"{% endif %}></div></td> 
+    <td><a href="{% url edit_filter filter.website.id filter.id %}" title="Edit '{{ filter.name }}'">{{ filter.name }}</a></td> 
+    <td class="narrow right"><span class="graph sparkline" id="sparkline_{{ filter.id }}">{{ filter_hits }}</span><span class="filter-total">{{ total_for_period }}</span></td>
+    <td class="narrow"><div class="checkbox"><input type="checkbox" {% if not user_perms.edit %}disabled="true"{% endif %} name="filter_on_off" value="{{ filter.id }}" class="on-off" {% if filter.active %}checked="checked"{% endif %} /></div></td> 
+    <td class="last">{% if user_perms.edit and not filter.active %}<a title="Delete '{{ filter.name }}" href="{% url delete_filter filter.website.id filter.id %}" class="remove">Remove</a>{% endif %} </td> 
+</tr>

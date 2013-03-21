@@ -1,0 +1,35 @@
+{% extends 'rules/admin/admin_base.html' %}
+
+{% block title %}Invoices and pending charges{% endblock %}
+
+{% block content %}
+	<div class="border-box">
+		<div class="border-box-inner border-box-first">
+			Charges relating to:
+			{% for website in account.websites.all %} {{ website.name }} {% endfor %}
+		</div>
+		<div class="border-box-inner">
+			<h3>Pending charges</h3>
+			<div id="pending">
+				<ul>
+				{% for c in pending_charges %}
+					<li>On: {{ c.date|date:"Y-m-d" }} amount: ${{ c.amount|floatformat:"-2" }} for: {{ c.description }}</li>
+				{% empty %}
+					<li>No outstanding charges</li>
+				{% endfor %}
+				</ul> 
+			</div> 
+		</div>
+		<div class="border-box-inner">
+			<h3>Past invoices</h3>
+			<div id="invoices">
+				<ul>
+				{% for i in invoices %} 
+					<li>#{{ i.number }} on {{ i.date|date:"Y-m-d" }} Total: ${{ i.inc_tax|floatformat:"-2" }} {% if i.inc_tax > i.ex_tax %}(Before tax: ${{ i.ex_tax|floatformat:"-2" }}){% endif %}</li>
+				{% endfor %}
+				</ul>  
+			</div>
+		</div>
+	</div> <!-- border-box -->
+
+{% endblock %}

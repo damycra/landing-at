@@ -1,0 +1,45 @@
+
+
+<form id="edit_pagegroup" action="{% url edit_pagegroup website.id pagegroup.id %}" method="post">
+	{{ form.as_p }}
+	
+	<hr />
+	{{ page_formset.management_form }}
+	{% for pf in page_formset.forms %}
+		{{ pf.as_p }}
+	{% endfor %}
+	
+	<input id="edit_pagegroup_submit" type="submit" value="Save" /> | <a id="edit_pagegroup_cancel" href="#">Cancel</a>
+</form>
+
+
+<script type="text/javascript">
+	$("#edit_pagegroup").submit(function() {
+		$.post($("#edit_pagegroup").attr("action"), $(this).serialize(), function(response, status, xhr){
+			if(xhr.getResponseHeader('Content-Type').indexOf('json') > -1) {
+				data = $.parseJSON( response );
+				if(data == null)
+					data = response;
+				$("#page_group_" + data["id"]).remove();
+				$("#page_groups_div").append(data["summary"]);
+				setTimeout('$("#popup").empty()', 1000);
+				hidePopup();
+			}
+			else {
+				$("#popup").html(response);
+			}
+			
+			$("#edit_pagegroup_submit").attr("disabled", "");
+		});
+		$("#edit_pagegroup_submit").attr("disabled", "disabled");
+		setTimeout('$("#edit_pagegroup_submit").attr("disabled", "");', 5000);
+		
+		return false;
+	});
+	
+	$("#edit_pagegroup_cancel").click(function() {
+		setTimeout('$("#popup").empty()', 1000);
+		hidePopup();
+		return false;
+	});
+</script>

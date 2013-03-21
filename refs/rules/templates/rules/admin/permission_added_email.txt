@@ -1,0 +1,19 @@
+{% if token %}
+Hello,
+
+{{ perm_user.first_name }} {{ perm_user.last_name }} has added you as a landing.at user for the following websites: {{ websites }}
+
+To create an account on landing.at, please click the link below and follow the instructions:
+manage.landing.at{% url register_with_token token %}
+
+{% else %}
+Dear {{ invitee.first_name }},
+
+{{ perm_user.first_name }} {{ perm_user.last_name }} has added permissions for you on the following websites: {{ websites }}.
+
+{% endif %}
+
+Many thanks, 
+
+The landing.at team
+support@landing.at

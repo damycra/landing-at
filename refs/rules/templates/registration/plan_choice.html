@@ -1,0 +1,36 @@
+{% extends 'rules/admin/admin_base.html' %}
+
+{% block title %}Plans{% endblock %}
+
+{% block content %}
+	<div class="border-box">
+		<div class="border-box-inner border-box-first">
+			<h3>Your plan</h3>
+			<div>
+				You are currently on the {{ user_plan.price_plan.name }} plan. {% if user_plan.card_set_up %}<a href="https://landing-at-test.recurly.com/account/{{ user_plan.recurly_login_token }}">Change payment card details (via recurly.com)</a>{% endif %} 
+			</div> 
+		</div>
+		
+		{% for plan in all_plans %}
+		<div class="border-box-inner">
+			<h3>{{ plan.name }}</h3>
+			<div>
+				{{ plan.description }} 
+				{% if user_plan.price_plan = plan %}
+				You are on this plan!
+				{% else %}
+					{% if not user_plan.card_set_up %}
+					<a href="{{ recurly_url }}{{ plan.slug }}/{{ user_plan.recurly_account_code|urlencode }}?first_name={{ user.first_name|urlencode }}&last_name={{ user.last_name|urlencode }}&email={{ user.email|urlencode }}">Subscribe (via recurly.com)</a>
+					{% else %}
+					<form action="{% url change_plan %}" method="post">{% csrf_token %}
+						<input type="hidden" name="plan" value="{{ plan.slug }}" />
+						<button type="submit">{% if user_plan_level > plan.level %}Downgrade{% else %}Upgrade{% endif %}</button>
+					</form>
+					{% endif %}
+				{% endif %}
+			</div>
+		</div>
+		{% endfor %}
+	</div> <!-- border-box -->
+
+{% endblock %}

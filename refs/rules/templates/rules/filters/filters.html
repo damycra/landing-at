@@ -1,0 +1,115 @@
+{% extends 'rules/filters/filter_base.html' %}
+
+{% block custom_js %}
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.sparkline.min.js"></script>
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.tablednd_0_5.js"></script> 
+{% endblock %}
+
+{% load rule_tags %}
+
+{% block title %}Profiles for {{ website.name }}{% endblock %}
+
+{% block content_div_attributes %}class="content-narrow"{% endblock %}
+{% block content %}
+	{% if sandbox %}
+	<div style="background-color:#ffffcc;">
+<p style="padding-left:10px"><b>Welcome to the landing.at sandbox.</b> Here you can experiment by creating, editing and testing profiles on our test site. The sandbox will be reset frequently, and because it is public please don't put any information that you don't want anyone else to see.</p></div>
+	{% else %}
+	 {% endif %} 
+    <form id="mainForm" method="post" >{% csrf_token %}
+		{{ form.filter_order }}
+	    
+        <div id="filter-listing">
+        {% if user_perms.edit %} 
+          <div class="float-right pad-10-0-0"> 
+			<a href="{% url add_filter website.id %}" class="btn"><span></span>New Profile</a> 
+          </div> <!-- //float-right -->
+		 {% endif %} 
+		{% if sandbox %}
+<h2>Starting with an existing profile &darr; &nbsp;&nbsp;&nbsp;&nbsp; or create a new one &rarr;</h2>
+		
+		{% else %}
+<h1>{% if website.filters.count == 0 %}No Profiles! You should create one &rarr;{% else %}Profile Manager{% endif %}</h1>{% endif %}
+		
+        	{% if user_perms.edit %}  <p style="display:none"  class="unsaved"><b>You have unsaved changes</b></p> {% endif %}
+			<table class="filters">
+				<thead> 
+		              <tr class="nodrag nodrop"> 
+		                <th></th> 
+		                <th>Name</th>  
+		                <th>Last 14 Days</th> 
+		                <th>Status</th> 
+		                <th>&nbsp;</th> 
+		              </tr> 
+		            </thead>
+					<tbody>
+			{% for filter in website.filters.all %}
+			{% ifchanged filter.container_element_id %} 
+				<tr class="nodrag nodrop"><th>Tag</th><th>{{ filter.container_element_id }}</th><th colspan="3">&nbsp;</th></tr>				
+			{% endifchanged %}
+			
+				{% filter_summary %}
+			
+			{% if forloop.last %}</tbody>{% endif %}
+			{% endfor %}
+ 		{% if user_perms.edit %} 
+            <tfoot style="display:none" class="unsaved">
+              <tr class="">
+                <td colspan="6"><button type="submit" class="btn">Save</button> or <a href="" class="cancel">cancel</a></td>
+              </tr>
+            </tfoot>
+		{% endif %}
+          </table>
+ 
+        </div> <!-- //filter-listing --> 
+	</form>
+				 
+ 
+{% endblock %}
+
+{% block bottom_script %}
+{{ block.super }}
+<script type="text/javascript">
+	jQuery(document).ready(function($){
+//		if($(".container-heading").length==1) {
+//			$(".container-heading").hide();
+//		}
+		$(".on-off").change(function() {
+			$(".unsaved").show(300);
+		});
+		
+		$('.sparkline').sparkline('html', {type: 'line', lineColor: '#4da200', spotRadius: 0, fillColor:false} );
+		
+		$(".remove").click(function() {
+			var filterRowId = "#" + $(this).parents("tr").attr("id");
+			$.ajax({
+            	url: this.href,
+				type: "post",
+	            success: function(response, status, xhr){
+					if(xhr.getResponseHeader('Content-Type').indexOf('json') > -1) {
+						data = $.parseJSON( response );
+						if(data == null)
+							data = response;
+						if (data.status == "OK") {
+							$(filterRowId).hide(400).remove();
+						}
+						else {
+							alert("error: " + data.errors);
+						}
+					}
+					else {
+						alert("error");
+					}
+				},
+	            error: function(xhr, status, err) {
+	                alert("error");
+	            }
+        	});
+			
+			return false;
+		});
+		
+		onFilterDrop();
+	});
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'rules/websites/website_base.html' %}
+
+{% block title %}{% if website.id %}Edit website: {{ website.name }}{% else %}Add website{% endif %}{% endblock %}
+
+
+	{% block dashboard_tab %}{% if new_website %}class="active"{% endif %}{% endblock %} 
+	{% block settings_tab %}{% if not new_website %}class="active"{% endif %}{% endblock %}
+					
+{% block content %}
+	<form id="mainForm" method="post" >{% csrf_token %}
+		<div> 
+          <div class="float-right pad-15-0" style="font-size: 16px;">{% if website.id %}<a href="{% url view_website website.id %}"><b>&larr; Go back</b></a>{% endif %}</div> 
+          <h1>{% if website.id %}Edit website{{ website.name }}{% else %}Add website{% endif %} </h1> 
+          <div class="border-box"> 
+            <div class="border-box-inner border-box-first small-text"> 
+              {% if form.errors %}
+			  <div class="error-message"> 
+                Please check the errors detailed below
+					<div class="required">{{ form.non_field_errors }}</div>
+				{{ form.tracking_method.errors }}
+              </div> <!-- //error-message -->
+			  {% endif %} 
+              
+              <div> 
+                Please enter your site address (e.g. www.example.com) below. <b>You do not need to enter 'http://'</b>. By default subdomains (e.g. test.example.com) are included but you can switch this off. 
+              </div> 
+            </div> <!-- //border-box-inner --> 
+		            
+			<div class="border-box-inner"> 
+              <div class="clearfix row"> 
+                <div class="row-left">{{ form.name.label_tag }} <span class="required">*</span></div> 
+                <div class="row-right"><div class="textbox{% if form.name.errors %} error{% endif %}" style="width: 175px;">{{ form.name }}</div></div>
+					<div class="required">{{ form.name.errors }} </div>
+              </div> <!-- //row --> 
+            </div> <!-- //border-box-inner -->
+			<div class="border-box-inner slider">
+            <b>	{{ form.include_subdomains.label_tag }} </b>
+				{{ form.include_subdomains }}
+			<div class="required">{{ form.include_subdomains.errors }}</div> 
+              </div> <!-- //border-box-inner -->
+			 <div class="border-box-inner slider">
+            	<b>{{ form.ga_event_tracking.label_tag }}</b> 
+				{{ form.ga_event_tracking }}
+			<div class="required">{{ form.ga_event_tracking.errors }} </div>
+              </div> <!-- //border-box-inner -->
+			  <div style="display:none">{{ form.tracking_method }}</div>  
+            <div class="border-box-inner border-box-last"> 
+              <button type="submit" class="btn btn-big"><span></span>{% if website.id %}Save website{% else %}Add website{% endif %}</button> {% if website.id %}or <a href="{% url administer_site website.id %}">Cancel</a>{% endif %} 
+            </div> <!-- //border-box-inner --> 
+          </div> <!-- //border-box --> 
+        </div>  						
+	</form>
+	<!-- Google Code for Registers Conversion Page -->
+	<script type="text/javascript">
+	/* <![CDATA[ */
+	var google_conversion_id = 1010651446;
+	var google_conversion_language = "en";
+	var google_conversion_format = "3";
+	var google_conversion_color = "ffffff";
+	var google_conversion_label = "erIpCJLa-QEQtqL14QM";
+	var google_conversion_value = 0;
+	if (5) {
+	  google_conversion_value = 5;
+	}
+	/* ]]> */
+	</script>
+	<script type="text/javascript" src="https://www.googleadservices.com/pagead/conversion.js">
+	</script>
+	<noscript>
+	<div style="display:inline;">
+	<img height="1" width="1" style="border-style:none;" alt="" src="https://www.googleadservices.com/pagead/conversion/1010651446/?value=5&amp;label=erIpCJLa-QEQtqL14QM&amp;guid=ON&amp;script=0"/>
+	</div>
+	</noscript>
+
+{% endblock %}
+
+{% block bottom_script %}
+{{ block.super }}
+<script type="text/javascript">
+	jQuery(document).ready(function($) {
+		$(".slider input[type=checkbox]").jbCheck();
+	});
+</script>
+{% endblock %}

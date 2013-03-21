@@ -1,0 +1,1 @@
+{{ perm_user.first_name }} {{ perm_user.last_name }} has invited you to use landing.at

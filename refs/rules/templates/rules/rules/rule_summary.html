@@ -1,0 +1,4 @@
+<tr id="rule-tr-{{ rule.id }}"> 
+  <td title="{{ rule }}"><a class="edit_rule" href="{% url copy_rule rule.website.id rule.id 1 %}" title="Edit '{{ rule }}'">{{ rule }}</a></td> 
+  <td class="last">{% if user_perms.edit %}<a title="Delete '{{ rule }}'" href="#delete_{{ rule.id }}" class="remove deleteRule">Remove</a>{% endif %}</td> 
+</tr> 

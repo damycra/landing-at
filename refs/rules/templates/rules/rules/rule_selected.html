@@ -1,0 +1,3 @@
+<li id="selected_rule_{{ rule.id }}" class="selected_rule" style="background:{% cycle '#EEF' '#FEE' %}" title="{{ rule }}">
+ 	{{ rule.name }} | <a class="copy_rule" href="{% url copy_rule rule.website.id rule.id 1 %}">Copy</a> | <a class="deselect_rule" href="#{{ rule.id }}">Deselect</a>
+</li>

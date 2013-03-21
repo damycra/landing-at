@@ -1,0 +1,100 @@
+{% extends 'rules/admin/admin_base.html' %}
+
+{% block dashboard_tab %}{% endblock %}
+{% block settings_tab %}class="active"{% endblock %}
+
+{% block content %}
+        <form id="mainForm" method="post" >{% csrf_token %}
+		  
+          <h1>Your Details</h1> 
+		  To change your email address, please contact support.
+          <div class="border-box">
+          	{% if upform.errors %} 
+            <div class="border-box-inner border-box-first small-text"> 
+              {% if upform.errors %}
+			  <div class="error-message"> 
+                Please check the errors detailed below
+              </div> <!-- //error-message -->
+			  {{ upform.non_field_errors }}
+			  {% endif %}  
+            </div> <!-- //border-box-inner --> 
+		    {% endif %}        
+			<div class="border-box-inner{% if not upform.errors %} border-box-first{% endif %}"> 
+              <div class="clearfix row"> 
+                <div class="row-left">{{ upform.first_name.label_tag }} <span class="required">*</span></div> 
+                <div class="row-right"><div class="textbox{% if upform.first_name.errors %} error{% endif %}" style="width: 175px;">{{ upform.first_name }}</div></div>
+				{{ upform.first_name.errors }} 
+              </div> <!-- //row -->
+              <div class="clearfix row"> 
+                <div class="row-left">{{ upform.last_name.label_tag }} <span class="required">*</span></div> 
+                <div class="row-right"><div class="textbox{% if upform.last_name.errors %} error{% endif %}" style="width: 175px;">{{ upform.last_name }}</div></div>
+				{{ upform.last_name.errors }} 
+              </div> <!-- //row --> 
+            </div> <!-- //border-box-inner -->
+			
+			<div class="border-box-inner"> 
+              <div class="clearfix row"> 
+			        <div class="row-left"> 
+			          {{ upform.country.label_tag }} <span class="required">*</span>
+			        </div>  
+			        <div class="row-right select"> 
+			          {{ upform.country }}
+					  {{ upform.country.errors }} 
+			        </div> 
+				</div>
+				<div class="clearfix row" id="state_row"> 
+			        <div class="row-left"> 
+			          {{ upform.state.label_tag }} <span class="required">*</span> 
+			        </div>  
+			        <div class="row-right select">
+					   {{ upform.state }}  
+			           {{ upform.state.errors }}
+			        </div>                
+              </div> <!-- //row --> 
+            </div> <!-- //border-box-inner -->
+			 
+			  <div class="border-box-inner slider">
+            	{{ upform.show_advanced_options.label_tag }} 
+				{{ upform.show_advanced_options }}
+				{{ upform.show_advanced_options.errors }}  
+              </div> <!-- //border-box-inner -->
+
+			  <div class="border-box-inner">
+            	<label for="">If you would prefer not to receive email communications from us apart from essential system messages, uncheck this box</label> 
+				{{ upform.email_optin }}
+				{{ upform.email_optin.errors }}  
+              </div> <!-- //border-box-inner -->
+
+            <div class="border-box-inner border-box-last"> 
+              <button type="submit" class="btn btn-big">Save</button> or <a href="{% url administer_site website.id %}">Cancel</a> 
+            </div> <!-- //border-box-inner --> 
+          </div> <!-- //border-box --> 
+          						
+	
+		</form>
+
+{% endblock %}
+
+{% block bottom_script %}
+{{ block.super }}
+<script type="text/javascript">
+	jQuery(document).ready(function($) {
+		$(".slider input[type=checkbox]").jbCheck();
+		
+		//hide and show state chooser appropriately
+		jQuery("#id_country").change(
+			function() {
+				stateRow = jQuery('#state_row');
+				if(jQuery(this).val() == US_ID) {
+					stateRow.show();
+					$('select').jbSelect();
+				}
+				else {
+					stateRow.hide();
+				}
+		}).change();
+	});
+	
+</script>
+{% endblock %}
+

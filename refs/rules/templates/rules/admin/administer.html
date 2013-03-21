@@ -1,0 +1,177 @@
+{% extends 'rules/admin/admin_base.html' %}
+{% load rule_tags %}
+
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+	<div class="border-box">
+	{% if account %}
+		<div class="border-box-inner border-box-first">
+		You are on the {{ user_plan.price_plan.name }} plan for the following website{{ websites|pluralize }}: {% for w in websites %} {{ w.name }} {% endfor %}
+		<br /><br />
+		<a href="{% url choose_plan %}">Change plan</a><br /><br />
+		
+		<a href="{% url show_invoices %}">Show invoices &amp; charges</a>
+		
+		</div>
+	{% endif %}
+	{% if website.id %}
+		<div class="border-box-inner {% if not account %}border-box-first{% endif %}">
+			<h3>{{ website.name }}</h3>
+			<div>
+				{% if website.exact_match %}This domain only.{% else %}Includes all subdomains.{% endif %} 
+				{% if website.tracking_method == 'evt' %}Profile hits will be recorded in Google Analytics as events.
+				{% else %}{% if website.tracking_method = 'non' %}Profile hits will not be recorded in Google Analytics.{% endif %}{% endif %}
+			</div>
+			{% if user_perms.admin %}<a href="{% url edit_website website.id %}">Edit</a> | <a href="{% url view_website website.id %}">Setup</a>{% endif %} 
+		</div>
+	{% endif %} 
+	{% if owner == user %}
+		<!-- 
+        <div class="border-box-inner{% if not website.id %} border-box-first{% endif %}"> 
+			<h3>Account Details</h3>
+	        	<div>
+			
+				{% if website.account.trial_period_ends %}
+					Your free trial ends on {{ website.account.trial_period_ends|date }} &mdash; <a href="#">Buy Now</a>!
+		
+				{% else %}
+					You are on the blaa plan at $59 /month. 
+					Details...
+				{% endif %}
+				
+				</div> 
+		</div>  	
+		-->
+	{% endif %}
+ 
+	</div>	
+
+	{% if website.id %} 	  
+	<h2>Manage Users</h2> 
+        
+        <div class="three-columns clearfix">
+        <!-- {% cycle 'col-3' 'col-1' 'col-2' as col_class %} -->
+		 {% for wuser in website.authorised_users.all %}	 
+          <div class="{% cycle col_class %}" id="wuser_{{ wuser.id }}"> 
+            <div class="person"> 
+              <div class="inner"> 
+                {% if wuser.user != owner and wuser.user != user and user_perms.admin %}<a href="{% url delete_user website.id wuser.id %}" class="remove"></a>{% endif %} 
+                <h3 title="{{ wuser.user.get_full_name }}">{{ wuser.user.get_full_name }}</h3> 
+                {% if wuser.user == owner %}Account Owner{% else %}{{ wuser.get_level_display }} {% endif %}
+				{% if wuser.user == user %}<div> {% if user.get_profile.country.code == 'US' %}{{ user.get_profile.get_state_display }}, United States{% else %}{{ user.get_profile.country.name }}{% endif %}</div>
+				<a href="{% url edit_user_profile %}">Edit</a> | <a href="{% url change_password %}">Change your password</a>
+				{% endif %}
+              </div> 
+            </div> <!-- //person --> 
+          </div> <!-- //col-n -->
+		
+			{% if forloop.counter|divisibleby:"3" %}  
+				</div> <!-- //three-columns --> 
+				{% if not forloop.last %}
+        		<div class="three-columns clearfix">
+        		{% endif %}
+        	{% endif %}
+		   
+          {% endfor %}
+		  
+		  {% with website.authorised_users.count as wusers %}
+			  {% for invite in website.invites.all %}
+			  {% if forloop.first and wusers|divisibleby:"3" %}
+			  		<div class="three-columns clearfix">
+			  {% endif %}
+			  <div class="{% cycle col_class %}"  id="invite_{{ invite.id }}"> 
+	            <div class="person person-not-active"> 
+	              <div class="inner"> 
+	                {% if user_perms.admin %}<a href="{% url delete_invite website.id invite.id %}" class="remove"></a>{% endif %} 
+	                <h3 title="{{ invite.email }}">{{ invite.email }}</h3> 
+	                {{ invite.get_level_display }}
+	              </div> 
+	            </div> <!-- //person --> 
+	          </div> <!-- //col-3 -->
+			  
+				  {% if forloop.counter|add:wusers|divisibleby:"3" or forloop.last %}  
+					</div> <!-- //three-columns --> 
+		        	{% if not forloop.last %}
+					<div class="three-columns clearfix">
+					{% endif %}
+		          {% endif %}
+			  
+			  {% empty %}
+			  	</div> <!-- //three-columns -->
+			  {% endfor %}
+		  {% endwith %}
+		  
+	{% if user_perms.admin %}		   
+    <form id="mainForm" method="post" >{% csrf_token %}    
+        <div id="add-user-form"> 
+          <div class="inner"> 
+            <h2>Add new user</h2> 
+            
+            <div class="row clearfix"> 
+              <div class="row-left">{{ form.email.label_tag }}</div> 
+              <div class="row-right"><div class="textbox{% if form.email.errors %} error{% endif %}">{{ form.email }}</div>
+			  </div> 
+			  {{ form.email.errors }}
+            </div> 
+            
+            <div class="row clearfix"> 
+              <div class="row-left">{{ form.level.label_tag }}</div> 
+              <div class="row-right"> 
+                {{ form.level }} 
+              </div>
+			  {{ form.level.errors }} 
+            </div> 
+			<div class="align-center pad-5-0">
+              <button type="submit" class="btn btn-big"><span></span>Add User</button>
+            </div>
+          </div> <!-- //inner --> 
+        </div> <!-- //add-user-form --> 
+	</form>
+	{% endif %}
+	
+	{% endif %}
+
+{% endblock %}
+
+{% block bottom_script %}
+{{ block.super }}
+<script type="text/javascript">
+	jQuery(document).ready(function($) {
+		$(".remove").click(function() {
+			$.ajax({
+            	url: this.href,
+				type: "post",
+				context: this,
+	            success: function(response, status, xhr){
+					if(xhr.getResponseHeader('Content-Type').indexOf('json') > -1) {
+						data = $.parseJSON( response );
+						if(data == null)
+							data = response;
+						if (data.wuser_id > 0) {
+							$("#wuser_" + data.wuser_id + " .inner").wrapAll("<del />");
+							$(this).remove();
+						}
+						else {
+							$("#invite_" + data.invite_id + " .inner").wrapAll("<del />");
+							$(this).remove();
+						}
+					}
+					else {
+						alert("Unexpected error, please refresh the page in a moment and try again");
+					}
+				},
+	            error: function(xhr, status, err) {
+					if (xhr.status == 404) {
+						$(this).parents("div.person").parent().wrapAll("<del />");
+						$(this).remove();
+					}
+	            }
+        	});
+			
+			return false;
+		});
+	});
+</script>
+{% endblock %}

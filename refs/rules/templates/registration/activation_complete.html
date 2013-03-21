@@ -1,0 +1,9 @@
+{% extends 'registration/registration_base.html' %}
+
+{% block body %}
+<h3>Thank You For Activating.</h3>
+
+<p>You may now <a href="{% url django.contrib.auth.views.login %}?next={% url add_website %}">log in</a></p>
+
+
+{% endblock %}

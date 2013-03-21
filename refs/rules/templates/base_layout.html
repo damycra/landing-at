@@ -1,0 +1,129 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+ 
+<head> 
+	<title>LandingAt: {% block title %}Welcome{% endblock %}</title>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<link rel="stylesheet" href="{{ MEDIA_URL }}css/style.css?cssts=yyyymmddhhmmss" type="text/css" media="all" />
+	  
+  	<meta name="keywords" content="" /> 
+  	<meta name="description" content="" />  
+	
+	<!--[if IE]><script language="javascript" type="text/javascript" src="javascripts/excanvas.min.js"></script><![endif]-->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js" type="text/javascript"></script>
+	<script src="https://ajax.microsoft.com/ajax/jquery.templates/beta1/jquery.tmpl.min.js" type="text/javascript"></script>
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/scripts.js?jsts=yyyymmddhhmmss"></script>
+	<script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.placeholder.js"></script>	 
+	<script type="text/javascript">
+	function toggle(element) {
+		$("#" + element).toggle(400);
+	}
+	</script>
+	{% block custom_js %}
+	
+	{% endblock %}
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-34879874-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head> 
+ 
+<body>
+	{% load rule_tags %}
+	
+	{% block noscript %}
+	<noscript>This site will not work without JavaScript. Please enable JavaScript in your browser settings</noscript>
+	{% endblock %}	 
+
+  <div id="wrap"> 
+
+    <div id="container"> 
+      <div id="header"> 
+        <div id="logo"><a href="{% if website.id %}{% url filters website.id %}{% else %}javascript:return false{% endif %}">landing.at</a></div> 
+	
+        <div id="login">
+			{% if sandbox %}
+      		You are logged into the sandbox as <b>{{ user.get_full_name }}</b>
+			{% else %}
+        	{% if user.is_authenticated %} 
+          		Signed in as <b>{{ user.get_full_name }}</b> &nbsp; <a href="{% url django.contrib.auth.views.logout %}" class="btn">Log out</a> 
+			{% else %} {# shouldn't really happen? #}
+			 	<a href="{% url django.contrib.auth.views.login %}" class="btn">Login</a> or <a href="{% url registration_register %}" class="btn">Register</a> 
+
+			{% endif %} {% endif %}
+        </div> <!-- //login --> 
+      </div> <!-- //header --> 
+    
+      <div id="navigation"> 
+        <ul id="mainmenu">
+          {% if not website.verified_date or show_setup_tab %} 
+          <li {% block dashboard_tab %}{% endblock %}><a href="{% if not website.id %}javascript:return false;{% else %}{% url view_website website.id %}{% endif %}" class="dashboard"><span class="arrow"></span><span class="nav-name">{% block first_tab_text %}Setup{% endblock %}</span><span class="nav-ico"></span></a></li>
+		  {% endif %} 
+          {% if not new_website and website.id %}
+			  <li {% block filters_tab %}{% endblock %}><a href="{% url filters website.id %}" class="filters"><span class="arrow"></span><span class="nav-name">Profiles</span><span class="nav-ico"></span></a></li>  
+	          <li {% block settings_tab %}{% endblock %}><a href="{% url administer_site website.id %}" class="admin"><span class="arrow"></span><span class="nav-name">Settings</span><span class="nav-ico"></span></a></li>
+		  {% endif %} {# if website.id #} 
+        </ul> <!-- //mainmenu --> 
+        
+		{% block site_selector %}
+        <div id="site-selector"> 
+          <select id="chooseWebsite"> 
+			{% for wsu in user.authorised_websites.all %}
+				<option value="{% url view_website wsu.website.id %}" {% if wsu.website.id == website.id %}selected="selected"{% endif %}>{{ wsu.website }}</option>
+			{% empty %}
+				<option value="#">No websites configured</option>
+			{% endfor %} 
+			{% if user_perms.account_holder %}
+				<option value="{% url add_website %}" {% if not website.id %}selected="selected"{% endif %}>+ Add New Site</option>
+			{% endif %}	 
+		  </select> 
+        </div> <!-- //site-selector -->
+		{% endblock %} 
+      </div> <!-- //navigation --> 
+      
+      <div id="content" {% block content_div_attributes %}{% endblock %} > 
+		{% if messages %}
+			<ul class="alert-message">
+			    {% for message in messages %}
+			    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+			    {% endfor %}
+			</ul>
+		{% endif %}
+
+		{% block content %}
+		
+		{% endblock %}        
+      </div> <!-- //content --> 
+      
+    </div> <!-- //container --> 
+    <div id="footer"> 
+      &copy; 2010 Cambridge Circus Software Ltd.  |  <a href="#">Contact</a>  |  <a href="#">Terms of Use</a>  |  <a href="#">Privacy Policy</a>
+
+    </div> <!-- //footer --> 
+ 
+ 
+ 	{% block bottom_script %}
+    <script type="text/javascript">
+	    jQuery(document).ready(function($) {
+			$("#chooseWebsite").change(function() {
+			document.location = $(this).val();
+		  });
+		});
+    </script>
+	
+	{% endblock %}
+	
+  </div> <!-- //wrap --> 
+</body> 
+</html>
+

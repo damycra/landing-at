@@ -1,0 +1,7 @@
+{% if user == permissioning_user %}
+	You cannot change your own permissions!
+{% else %}
+	{% if user == account_owner %}
+		You cannot change the account owner's permissions!
+	{% endif %}
+{% endif %}

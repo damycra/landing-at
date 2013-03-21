@@ -1,0 +1,17 @@
+{% extends 'base_layout.html' %}
+
+{% block body %}
+
+{% for wu in websiteuser_list %}
+<h3><a href="{% url view_website wu.website.id %}">{{ wu.website }}</a></h3>
+<p>
+	<a href="{% url edit_website wu.website.id %}">Edit</a>
+</p>
+
+{% endfor %}
+	
+{% if user.accounts.all.0 %}
+	<a href="{% url add_website %}">Add Website</a>
+{% endif %}
+
+{% endblock %}

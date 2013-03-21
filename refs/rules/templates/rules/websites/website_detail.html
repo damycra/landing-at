@@ -1,0 +1,102 @@
+{% extends 'rules/websites/website_base.html' %}
+
+{% block title %}{{ website.name }}{% endblock %}
+
+{% block custom_js %} 
+<script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}js/jquery.flot.min.js"></script> 
+<!--[if IE]><script language="javascript" type="text/javascript" src="{{ MEDIA_URL }}flot/excanvas.pack.js"></script><![endif]-->
+{% endblock %}
+
+{% block dashboard_tab %}class="active"{% endblock %} 
+{% block settings_tab %}{% endblock %}
+
+{% block content %}
+	<h1>{% if new_website %}Add code snippet to your pages on {{ website.name }}{% else %} Setup for {{ website.name }} {% endif %}</h1>
+        
+
+
+<div class="border-box">
+		<div class="border-box-inner border-box-first">
+			<h3>Code Snippet</h3>
+			<div>
+				<span id="installationUnverified" {% if website.verified_date %}style="display:none"{% endif %}><b>Installation unverified</b></span>
+				<span id="installationVerified" {% if not website.verified_date %}style="display:none"{% endif %}><b>Verified on {{ website.verified_date }}</b></span>
+			</div>
+			<div>
+				<textarea cols="80" rows="14">{{ website.js_fragment }}</textarea>
+			</div>
+			<div>landing.at only tracks pages that contain the landing.at code snippet. You should insert this code immediately before the <code>&lt;/body&gt; </code>tag. <br/>If you're unsure how to put this into a webpage, you should contact your technical team or webmaster.
+</div>
+		</div>
+		
+		{% if user_perms.admin %}
+		<form method="post" id="verify_form" action="{% url verify_website website.id %}">{% csrf_token %}
+        <div class="border-box-inner"> 
+              <div class="clearfix row">
+	            <div class="row-left" style="width: 150px; margin-right: 5px">Enter URL to verify:</div> 
+	 
+                <div class="row-right" style="width: 495px; margin-right: 5px">
+				<div class="textbox float-left" style="width: 395px; margin-right: 5px;"><input name="test_url" id="id_test_url" type="text" value="http://{{ website.name }}/" /></div> <button type="submit" id="test_installation" class="btn" style="width: 70px;">Verify</button> 
+              </div></div>
+			  <div class="loading" style="display:none">&#160;</div><div id="test_results" class="clearfix row required" style="display:none"></div> 
+        </div> <!-- //border-box-inner -->
+		</form>
+		{% endif %}
+
+</div>
+{% if website.filters.count == 0 and user_perms.edit %}
+<div class="border-box">
+	<div class="border-box-inner border-box-first">
+		<div><a href="{% url add_filter website.id %}" class="btn btn-big"><span></span>Create your first profile</a></div>
+	<div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block bottom_script %}
+{{ block.super }}
+<script type="text/javascript">
+	jQuery(document).ready(function($){
+		var showing = {% if website.verified_date or top_filters %}false{% else %}true{% endif %};
+		$("#showSnippet").toggle(function() {
+			showHideSnippet(!showing);
+		}, function() {
+			showHideSnippet(showing);
+		});
+		
+		$("#id_test_url").keypress(function(event) {
+			if (event.keyCode == 13) {	
+				$("#verify_form").submit();
+				event.preventDefault();
+				return false;
+			}
+		});
+		
+		$("#verify_form").submit(function() {
+			$(".loading").show();
+			$("#test_results").hide();
+			$("#test_installation").attr("disabled", "disabled");			
+			$.post(this.action, $(this).serialize(), function(response) {
+				if (response.errors) {
+					$("#test_results").html("Errors: <ul />");
+					for (err in response.errors) {
+						$("#test_results ul").append("<li>" + response.errors[err] + "</li>");
+					}
+					$("#test_installation").attr("disabled", "");
+				}
+				else {
+					$("#test_results").html("<h3>Verified!</h3>");
+					$("#installation_unverified").hide();
+					$("#installation_verified").html("Verified").show();
+				}
+				
+				setTimeout('$(".loading").hide();', 1000);
+				setTimeout('$("#test_results").show();', 1000);
+			});
+			setTimeout('$("#test_installation").attr("disabled", "");', 5000)
+			return false;
+		});
+	});
+</script>
+{% endblock %}
